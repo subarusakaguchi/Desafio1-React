@@ -13,36 +13,50 @@ interface Task {
 export function TaskList() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [ids, setNewId] = useState<number[]>([])
 
   function handleCreateNewTask() {
     if (newTaskTitle && newTaskTitle !== '') {
+      let newId: number = 0
+      if (ids.length > 0) {
+        const lastEl: number = ids[ids.length - 1]
+        newId = lastEl + 1
+      }
+
       const newTask: Task = {
-        id: Math.random(),
+        id: newId,
         title: newTaskTitle,
         isComplete: false
       }
+
+      const newIds: number[] = [...ids, newId]
+      setNewId(newIds)
       
-      setTasks(oldTaks => [...oldTaks, newTask])
+      const newTasks: Task[] = [...tasks, newTask]
+      setTasks(newTasks)
 
       setNewTaskTitle('')
     } else {
-      alert('Erro! Título vazio!')
+      alert('Título vazio!')
     }
   }
 
   function handleToggleTaskCompletion(id: number) {
-    const newTasks: Task[] = tasks.map((task) => task.id === id ? {
-      ...task,
-      isComplete: task.isComplete ? false:true
-    } : task)
-
-    setTasks(newTasks)
+    const newTaskState: Task = tasks.filter((task) => {return task.id === id})[0]
+    const index = tasks.indexOf(newTaskState)
+    if (newTaskState) {
+      newTaskState.isComplete = newTaskState.isComplete ? false : true
+      const newTasks:Task[] = [...tasks.slice(0, index), newTaskState, ...tasks.slice(index + 1)]
+      setTasks(newTasks)
+    }
   }
 
   function handleRemoveTask(id: number) {
-    const newTasksList: Task[] = tasks.filter((task) => {return task.id !== id})
+    const newTasks: Task[] = tasks.filter((task) => {return task.id !== id})
+    const newIds: number[] = ids.filter((idCompare) => {return idCompare !== id})
 
-    setTasks(newTasksList)
+    setTasks(newTasks)
+    setNewId(newIds)
   }
 
   return (
